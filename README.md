@@ -189,8 +189,8 @@ Deployment / Reporting (Phase 7–9)
 
 ## Author
 
-**Shalom Bebebaraseigha** (Shards)  
-Computer Science — University of Uyo | Class of 2027  
+**Shalom Bebebaraseigha**
+Computer Science — University of Uyo | '023 
 SIWES Industrial Training: NDDC, Bayelsa State, 2026  
 GitHub: [@shalombebx](https://github.com/shalombebx)
 
