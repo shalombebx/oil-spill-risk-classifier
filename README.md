@@ -20,8 +20,8 @@ theft and artisanal refining. Despite this, operational responses by regulatory 
 reactive, lacking predictive severity tooling. This applied data science project develops an
 end-to-end multi-class predictive risk classifier leveraging historical NOSDRA monitoring data.
 Following the CRISP-DM framework, raw incident records were sanitised, and an 80/20 stratified
-split was applied to preserve class distribution. Candidate classifiers — including a Dummy
-baseline, Random Forest, and XGBoost — were evaluated using the Weighted F1 Score. To demystify
+split was applied to preserve class distribution. Candidate classifiers including a Dummy
+baseline, Random Forest, and XGBoost were evaluated using the Weighted F1 Score. To demystify
 the model, Explainable AI (XAI) was integrated using SHAP feature attribution maps to extract
 business-level insights and actionable policy recommendations.
 
@@ -30,7 +30,7 @@ business-level insights and actionable policy recommendations.
 ## Problem Statement
 
 The primary problem is that oil spill response prioritisation in the Niger Delta is currently
-reactive — no predictive severity tooling exists at the time of incident reporting. This project
+reactive, no predictive severity tooling exists at the time of incident reporting. This project
 proposes a multi-class classifier predicting severity (Major / Medium / Minor) from incident
 attributes available at the point of reporting (cause, company, location, habitat), enabling
 proactive resource allocation for agencies such as NDDC and NOSDRA.
@@ -67,7 +67,7 @@ proactive resource allocation for agencies such as NDDC and NOSDRA.
 
 > **Important:** The raw NOSDRA dataset does not contain a pre-labelled severity column.
 > The target variable (`severity`) was engineered using official NOSDRA barrel volume
-> thresholds combined with habitat type — a key methodological contribution of this project.
+> thresholds combined with habitat type; a key methodological contribution of this project.
 
 ```
 Inland water habitats:
@@ -229,7 +229,7 @@ jupyter notebook
 > ⚠️ **Critical Interpretation:** The high Weighted F1 of 0.9426 is driven almost entirely by the
 > Minor class (support = 2,536). The model currently fails to identify Major spills (F1 = 0.00)
 > and struggles significantly with Medium (F1 = 0.06) due to the extreme class imbalance. This is
-> an acknowledged limitation of the current iteration — see Future Work below.
+> an acknowledged limitation of the current iteration, see Future Work below.
 
 ---
 
@@ -240,15 +240,15 @@ jupyter notebook
 1. **`cause`** — Incidents attributed to Sabotage/Theft and Equipment Failure are the strongest
    predictors of Major severity classifications, as identified in the global SHAP bar chart.
 
-2. **`spillareahabitat`** — Open sea and sensitive inland swamp environments disproportionately
+2. **`spillareahabitat`:** Open sea and sensitive inland swamp environments disproportionately
    push the model toward Major predictions, reflecting the lower volume thresholds for inland
    habitats in NOSDRA's severity definition.
 
-3. **`company`** — Certain operating companies carry an inherent risk baseline. Historical
+3. **`company`:** Certain operating companies carry an inherent risk baseline. Historical
    data from operators such as NAOC and SPDC shows higher-volume incident patterns,
    causing the model to assign higher severity probabilities to these operators.
 
-4. **`incident_year`** — More recent years (post-2020) act as a mitigating factor in local
+4. **`incident_year`:** More recent years (post-2020) act as a mitigating factor in local
    force plots, likely reflecting improved containment technologies or shifts in reporting behaviour.
 
 ### Policy Recommendations
