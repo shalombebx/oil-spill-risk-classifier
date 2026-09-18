@@ -135,11 +135,12 @@ oil-spill-risk-classifier/
 ├── .gitignore                         ← Excludes data/, models/, __pycache__/
 │
 ├── notebooks/                         ← Executed notebooks (one per phase)
-│   ├── 01_eda.ipynb                   ← Phase 2: Data Understanding
-│   ├── 02_eda_part_b.ipynb            ← Phase 3: Exploratory Data Analysis
+│   ├── 01_data_understanding.ipynb    ← Phase 2: Data Understanding
+│   ├── 02_exploratory_data_analysis.ipynb ← Phase 3: Exploratory Data Analysis
 │   ├── 03_preprocessing.ipynb         ← Phase 4: Data Preparation
 │   ├── 04_modeling.ipynb              ← Phase 5: Modelling & Evaluation
-│   └── 04_explainability.ipynb        ← Phase 6: SHAP XAI + Report Generation
+│   ├── 05_explainability.ipynb        ← Phase 6: SHAP XAI 
+│   └── 06_report_generation.ipynb     ← Phase 7: Automated Report Generation
 │
 ├── src/                               ← Reusable Python modules
 │   ├── __init__.py
@@ -155,18 +156,21 @@ oil-spill-risk-classifier/
 │       ├── 04_spills_per_year.png     ← Temporal trend 2006–2025
 │       ├── 05_jiv_status.png          ← JIV status vs severity
 │       ├── shap_global_bar.png        ← Global SHAP feature importance
-│       ├── shap_beeswarm_*.png        ← Per-class beeswarm plots
-│       └── shap_force_plot_*.png      ← Local force plots (correct + error instances)
+│       ├── shap_beeswarm_0.png        ← Per-class beeswarm plots
+│       ├── shap_beeswarm_1.png
+│       ├── shap_beeswarm_2.png
+│       ├── shap_force_plot_idx0_correct.png ← Local force plots (correct instances)
+│       ├── shap_force_plot_idx1_correct.png 
+│       └── shap_force_plot_idx21_error.png  ← Local force plots (error instances)
 │
 ├── data/                              ← NOT tracked by Git
-│   ├── raw/                           ← Place NOSDRA CSV here
+│   ├── raw/                           ← Place nosdra_2026-08-23_15_32_02UTC_complete.csv here
 │   └── processed/                     ← X_train, X_test, y_train, y_test CSVs
 │
 └── models/                            ← NOT tracked by Git
     ├── xgboost_model.pkl
     ├── target_encoder.pkl
-    └── label_encoders.pkl
-```
+    └── label_encoders.pkl```
 
 ---
 
