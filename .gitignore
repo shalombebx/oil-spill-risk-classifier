@@ -1,0 +1,9 @@
+# Raw and Processed Datasets
+data/
+
+# Serialized Machine Learning Models and Encoders
+models/
+
+# Python and Jupyter Cache Directories
+__pycache__/
+.ipynb_checkpoints/
