@@ -139,7 +139,7 @@ oil-spill-risk-classifier/
 │   ├── 02_eda_part_b.ipynb ← Phase 3: Exploratory Data Analysis
 │   ├── 03_preprocessing.ipynb         ← Phase 4: Data Preparation
 │   ├── 04_modeling.ipynb              ← Phase 5: Modelling & Evaluation
-│   ├── 04_explainability.ipynb        ← Phase 6: SHAP XAI + Report Generation
+│   ├── 05_explainability.ipynb        ← Phase 6: SHAP XAI + Report Generation
 │
 ├── src/                               ← Reusable Python modules
 │   ├── __init__.py
