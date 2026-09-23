@@ -1,8 +1,11 @@
 # Raw and Processed Datasets
-data/
+*.csv
+nosdra_*.csv
 
 # Serialized Machine Learning Models and Encoders
 models/
+*.pkl
+*.joblib
 
 # Python and Jupyter Cache Directories
 __pycache__/
