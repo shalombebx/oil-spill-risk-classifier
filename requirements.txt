@@ -27,3 +27,4 @@ python-docx
 # Notebook environment (local only — not needed on Colab)
 notebook
 ipykernel
+streamlit>=1.30.0
