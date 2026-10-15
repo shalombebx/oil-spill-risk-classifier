@@ -63,22 +63,17 @@ if st.button("Predict Severity Risk", type="primary"):
     encoded_df = encoded_df[expected_features]
             
     # Generate numerical prediction safely
-    raw_prediction = model.predict(encoded_df)[0]
+    raw_prediction = int(model.predict(encoded_df)[0])
     
-    # Translate numerical prediction back to a guaranteed string
-    if target_encoder:
-        # int() strips numpy wrappers; str() ensures the output is a standard string
-        prediction_label = str(target_encoder.inverse_transform([int(raw_prediction)])[0])
-    else:
-        severity_map = {0: "Major", 1: "Medium", 2: "Minor"}
-        prediction_label = str(severity_map.get(int(raw_prediction), "Minor"))
+    # Hardcode the translation to bypass the integer-trained target encoder
+    severity_map = {0: "Major", 1: "Medium", 2: "Minor"}
+    prediction_label = severity_map.get(raw_prediction, "Minor")
 
     st.subheader("Predicted Outcome")
     
-    # Safely evaluate the guaranteed string
-    if "major" in prediction_label.lower():
+    if prediction_label == "Major":
         st.error(f"🚨 **{prediction_label.upper()} SEVERITY** - Proactive resource allocation recommended.")
-    elif "medium" in prediction_label.lower():
+    elif prediction_label == "Medium":
         st.warning(f"⚠️ **{prediction_label.upper()} SEVERITY**")
     else:
         st.success(f"✅ **{prediction_label.upper()} SEVERITY**")
