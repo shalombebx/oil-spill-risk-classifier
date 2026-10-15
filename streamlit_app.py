@@ -54,6 +54,10 @@ if st.button("Predict Severity Risk", type="primary"):
         if col in encoded_df.columns:
             encoded_df[col] = le.transform(encoded_df[col].astype(str))
             
+    # REORDER COLUMNS: Force alignment with the XGBoost training features
+    expected_features = model.feature_names_in_
+    encoded_df = encoded_df[expected_features]
+            
     # Generate numerical prediction from the XGBoost model
     prediction_encoded = model.predict(encoded_df)[0]
     
