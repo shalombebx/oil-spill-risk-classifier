@@ -58,21 +58,23 @@ if st.button("Predict Severity Risk", type="primary"):
     expected_features = model.feature_names_in_
     encoded_df = encoded_df[expected_features]
             
-    # Generate numerical prediction from the XGBoost model
-    prediction_encoded = model.predict(encoded_df)[0]
+    # Generate numerical prediction safely
+    raw_prediction = model.predict(encoded_df)[0]
     
-    # Translate numerical prediction back to human-readable severity
+    # Translate numerical prediction back to a guaranteed string
     if target_encoder:
-        prediction_label = target_encoder.inverse_transform([prediction_encoded])[0]
+        # int() strips numpy wrappers; str() ensures the output is a standard string
+        prediction_label = str(target_encoder.inverse_transform([int(raw_prediction)])[0])
     else:
-        # Fallback mapping assuming standard alphabetical encoding
         severity_map = {0: "Major", 1: "Medium", 2: "Minor"}
-        prediction_label = severity_map.get(prediction_encoded, "Minor")
+        prediction_label = str(severity_map.get(int(raw_prediction), "Minor"))
 
     st.subheader("Predicted Outcome")
-    if prediction_label.lower() == "major":
+    
+    # Safely evaluate the guaranteed string
+    if "major" in prediction_label.lower():
         st.error(f"🚨 **{prediction_label.upper()} SEVERITY** - Proactive resource allocation recommended.")
-    elif prediction_label.lower() == "medium":
+    elif "medium" in prediction_label.lower():
         st.warning(f"⚠️ **{prediction_label.upper()} SEVERITY**")
     else:
         st.success(f"✅ **{prediction_label.upper()} SEVERITY**")
