@@ -31,8 +31,12 @@ st.sidebar.write("Enter the details of the oil spill incident at the time of rep
 def get_user_input():
     user_data = {}
     
-    # Dynamically generate dropdowns for all categorical features using the saved LabelEncoders
+    # Dynamically generate dropdowns for all categorical features
     for col, encoder in encoders.items():
+        # SKIP THE TARGET VARIABLE
+        if col.lower() == "severity":
+            continue
+            
         options = list(encoder.classes_)
         user_data[col] = st.sidebar.selectbox(f"{col.capitalize()}", options)
     
