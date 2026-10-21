@@ -7,9 +7,6 @@ st.set_page_config(page_title="Oil Spill Risk Classifier", layout="wide")
 st.markdown(
     """
     <style>
-    :root {
-        color-scheme: light;
-    }
     .stApp {
         background: #ffffff;
         color: #202a35;
