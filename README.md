@@ -173,7 +173,7 @@ Run notebooks strictly in sequence — each one depends on outputs from the prev
 | 2 | `02_eda_part_b.ipynb` | Phase 3 — EDA | 5 figures, research question answers |
 | 3 | `03_preprocessing.ipynb` | Phase 4 — Preprocessing | X_train/X_test CSVs, encoders |
 | 4 | `04_modeling.ipynb` | Phase 5 — Modelling | Trained SMOTE XGBoost model, metrics |
-| 5 | `04_explainability.ipynb` | Phase 6 — XAI + Report | SHAP plots, IEEE report draft |
+| 5 | `05_explainability.ipynb` | Phase 6 — XAI + Report | SHAP plots, IEEE report draft |
 
 ---
 
