@@ -88,7 +88,7 @@ def load_components():
 try:
     model, encoders, target_encoder = load_components()
 except FileNotFoundError:
-    st.error("Model files not found. Ensure `models/xgboost_model.pkl` and `models/label_encoders.pkl` exist in the root directory.")
+    st.error("Model files not found. Ensure `models/xgboost_weighted_model.pkl` and `models/label_encoders.pkl` exist in the root directory.")
     st.stop()
 
 st.sidebar.title("Incident details")
