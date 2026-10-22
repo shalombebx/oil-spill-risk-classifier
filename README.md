@@ -6,28 +6,27 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-latest-orange.svg)
 ![XGBoost](https://img.shields.io/badge/XGBoost-latest-green.svg)
-![imbalanced-learn](https://img.shields.io/badge/imbalanced--learn-SMOTE-blueviolet.svg)
+![imbalanced-learn](https://img.shields.io/badge/imbalanced--learn-SMOTENC-blueviolet.svg)
 ![SHAP](https://img.shields.io/badge/SHAP-latest-red.svg)
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)
 
 ---
 
 ## Abstract
 
-Oil spills ruin traditional livelihoods and cause untold damage to the environment across the Niger Delta. Several hundred oil spills are recorded in Nigeria each year, exacerbated by organised oil theft and artisanal refining. Despite this, operational responses by regulatory bodies remain reactive, lacking predictive severity tooling. This applied data science project develops an end-to-end multi-class predictive risk classifier leveraging historical NOSDRA monitoring data. Following the CRISP-DM framework, raw incident records were sanitised, and an 80/20 stratified split was applied to preserve class distribution. 
+Oil spills damage livelihoods and the environment across the Niger Delta. Several hundred spills are recorded in Nigeria each year, driven partly by organised oil theft and artisanal refining, yet regulatory response remains reactive and no predictive severity tooling exists at the point of reporting. This applied data science project builds a multi-class severity classifier (Major / Medium / Minor) from historical NOSDRA incident records, following the CRISP-DM framework. Raw records were cleaned, a severity target was engineered from official barrel-volume thresholds, and an 80/20 stratified split was applied.
 
-To overcome severe target class imbalance, the Synthetic Minority Over-sampling Technique (SMOTE) was applied dynamically to the training space. Candidate classifiers including a Dummy baseline, Random Forest, and a SMOTE-Optimized XGBoost were evaluated. To demystify the model, Explainable AI (XAI) was integrated using SHAP feature attribution maps to extract business-level insights and actionable policy recommendations.
+The target is severely imbalanced (about 96% Minor). Three XGBoost configurations were compared: an unweighted baseline, a SMOTENC-oversampled model, and a class-weighted model. Only class weighting meaningfully recovered minority-class recall (Medium 0.40, Major 0.20, versus 0.03 and 0.00 for the baseline), at a large cost in precision. SMOTENC gave a marginal gain only. SHAP is used to explain the final model's predictions.
 
 ---
 
 ## Problem Statement
 
-The primary problem is that oil spill response prioritisation in the Niger Delta is currently reactive; no predictive severity tooling exists at the time of incident reporting. This project proposes a multi-class classifier predicting severity (Major / Medium / Minor) from incident attributes available at the point of reporting (cause, company, location, habitat), enabling proactive resource allocation for agencies such as NDDC and NOSDRA.
+Oil spill response prioritisation in the Niger Delta is currently reactive. This project proposes a multi-class classifier that predicts severity from attributes available at the point of reporting (cause, company, location, habitat), to support triage and resource allocation by agencies such as NDDC and NOSDRA.
 
-**Domain:** Applied Data Science & Explainable Artificial Intelligence (XAI)  
-**Methodology:** CRISP-DM (Cross-Industry Standard Process for Data Mining)  
-**Academic Context:** SIWES Industrial Training — University of Uyo, Nigeria
+**Domain:** Applied Data Science & Explainable AI  
+**Methodology:** CRISP-DM  
+**Academic Context:** SIWES Industrial Training, University of Uyo, Nigeria
 
 ---
 
@@ -37,65 +36,64 @@ The primary problem is that oil spill response prioritisation in the Niger Delta
 |---|---|
 | **Source** | [NOSDRA Oil Spill Monitor](https://nosdra.oilspillmonitor.ng/oilspillmonitor.html) |
 | **File** | `nosdra_2026-08-23_15_32_02UTC_complete.csv` |
-| **Raw Size** | 21,107 rows × 42 columns |
-| **Usable Records** | 13,202 rows (after Unknown severity removal) |
-| **Final Model Dataset** | 13,202 rows × 10 columns (9 features + 1 target) |
-| **Train / Test Split** | 10,561 train / 2,641 test (80/20 stratified) |
+| **Raw size** | 21,107 rows x 42 columns |
+| **Usable records** | 13,202 rows (after removing Unknown severity) |
+| **Model dataset** | 13,202 rows x 10 columns (9 features + 1 target) |
+| **Train / test** | 10,561 / 2,641 (80/20 stratified, `random_state=42`) |
 
-> **Note:** The raw dataset is not included in this repository.  
-> Download it directly from the NOSDRA portal and place it in `data/raw/`.
+> The raw dataset is not included in this repository. Download it from the NOSDRA portal and place it in `data/raw/`.
 
-### Known Data Limitations
+### Known data limitations
 
-1. **Temporal Sparsity:** Published data does not reliably include spills prior to 2006.
-2. **Review Status:** Spills currently under active NOSDRA review are excluded from the download.
-3. **Data Latency:** The most recent incidents are omitted due to reporting latency.
+1. **Temporal sparsity:** published data does not reliably include spills before 2006.
+2. **Review status:** spills under active NOSDRA review are excluded from the download.
+3. **Data latency:** the most recent incidents are omitted due to reporting lag.
 
 ---
 
-## Target Variable — Severity Engineering
+## Target Variable: Severity Engineering
 
-> **Important:** The raw NOSDRA dataset does not contain a pre-labelled severity column.
-> The target variable (`severity`) was engineered using official NOSDRA barrel volume
-> thresholds combined with habitat type; a key methodological contribution of this project.
+The raw dataset has no severity label. `severity` was engineered from official NOSDRA barrel-volume thresholds combined with habitat type.
 
 ```text
 Inland water habitats:
-  Major  → > 250 barrels spilled
-  Medium → 25 – 250 barrels spilled
-  Minor  → < 25 barrels spilled
+  Major  -> > 250 barrels
+  Medium -> 25 - 250 barrels
+  Minor  -> < 25 barrels
 
 Land / Swamp / Shoreline / Open Sea:
-  Major  → > 2,500 barrels spilled
-  Medium → 250 – 2,500 barrels spilled
-  Minor  → < 250 barrels spilled
+  Major  -> > 2,500 barrels
+  Medium -> 250 - 2,500 barrels
+  Minor  -> < 250 barrels
 ```
 
-### Severity Distribution (After Engineering)
+### Class distribution (after removing Unknown)
 
-| Class | Count | Share | Test Support |
+| Class | Count (full dataset) | Share | Test support |
 |---|---|---|---|
 | **Minor** | 12,678 | ~96.0% | 2,536 |
 | **Medium** | 472 | ~3.6% | 95 |
 | **Major** | 52 | ~0.4% | 10 |
 
-> ⚠️ **Severe class imbalance** — Minor incidents dominate the dataset by a significant margin. SMOTE was actively applied during the Phase 5 modelling stage to synthesize artificial minority records, preventing the classifier from collapsing into majority-class predictions.
+The Major class has only 10 test samples. Any Major metric moves in steps of 10 percentage points per prediction and should be read as indicative, not reliable.
 
 ---
 
-## Features Used in Model
+## Features
 
-After preprocessing, 34 columns were excluded due to high missingness (>20%), non-predictive identifiers (IDs, certificate numbers), or free-text descriptions. The 9 features retained:
+34 columns were excluded for high missingness (>20%), being identifiers, or being free text. The 9 retained features:
 
 | Feature | Type | Description |
 |---|---|---|
-| `company` | Categorical | Operating company responsible for the spill |
-| `cause` | Categorical | Reported cause (e.g., Sabotage, Equipment Failure) |
-| `statesaffected` | Categorical | Nigerian state where spill occurred |
-| `spillareahabitat` | Categorical | Environmental type (inland, swamp, open sea, etc.) |
-| `incident_year` | Numeric | Year extracted from `incidentdate` |
-| `incident_month` | Numeric | Month extracted from `incidentdate` |
-| *(+ 3 others)* | Mixed | Remaining columns not excluded by business logic |
+| `company` | Categorical | Operating company |
+| `cause` | Categorical | Reported cause (e.g. sabotage, equipment failure) |
+| `statesaffected` | Categorical | State where the spill occurred |
+| `spillareahabitat` | Categorical | Habitat type (inland, swamp, open sea, etc.) |
+| `incident_year` | Numeric | Year from `incidentdate` |
+| `incident_month` | Numeric | Month from `incidentdate` |
+| *(+ 3 others)* | Mixed | Remaining columns not excluded by the filters above |
+
+Categorical features are label-encoded, which is why plain SMOTE is unsuitable (see Imbalance Handling).
 
 ---
 
@@ -105,12 +103,12 @@ After preprocessing, 34 columns were excluded due to high missingness (>20%), no
 |---|---|
 | Python 3.10+ | Core language |
 | pandas / NumPy | Data manipulation |
-| scikit-learn | Preprocessing, Random Forest, evaluation |
-| XGBoost | Gradient boosting classifier (GridSearchCV tuned) |
-| imbalanced-learn | Applying SMOTE for synthetic minority oversampling |
-| SHAP | Explainability layer (TreeExplainer) |
-| Matplotlib / Seaborn | Visualisation (all figures at 300 DPI) |
-| Google Colab + Drive | Development and persistence environment |
+| scikit-learn | Preprocessing, Random Forest, evaluation, class weights |
+| XGBoost | Gradient boosting classifier |
+| imbalanced-learn | SMOTENC oversampling (resampling inside a CV pipeline) |
+| SHAP | Explainability (TreeExplainer) |
+| Matplotlib / Seaborn | Visualisation (figures at 300 DPI) |
+| Google Colab + Drive | Development environment |
 
 ---
 
@@ -118,134 +116,143 @@ After preprocessing, 34 columns were excluded due to high missingness (>20%), no
 
 ```text
 oil-spill-risk-classifier/
-│
-├── README.md                          ← You are here
-├── requirements.txt                   ← Python dependencies (exact versions)
-├── .gitignore                         ← Excludes data/, models/, __pycache__/
-│
-├── notebooks/                         ← Executed notebooks (one per phase)
-│   ├── 01_eda.ipynb                   ← Phase 2: Data Understanding
-│   ├── 02_eda_part_b.ipynb            ← Phase 3: Exploratory Data Analysis
-│   ├── 03_preprocessing.ipynb         ← Phase 4: Data Preparation
-│   ├── 04_modeling.ipynb              ← Phase 5: Modelling, SMOTE & Evaluation
-│   ├── 05_explainability.ipynb        ← Phase 6: SHAP XAI
-│
-├── src/                               ← Reusable Python modules
-│   ├── __init__.py
-│   ├── preprocess.py                  ← Cleaning, encoding, severity engineering
-│   ├── model.py                       ← Training, SMOTE logic, cross-validation
-│   └── explain.py                     ← SHAP wrappers and plot helpers
-│
-├── reports/
-│   └── figures/                       ← All saved plots (300 DPI)
-│       ├── 01_top_12_companies.png    
-│       ├── 02_cause_vs_severity.png   
-│       ├── 03_severity_distribution.png 
-│       ├── 04_spills_per_year.png     
-│       ├── 05_jiv_status.png          
-│       ├── shap_global_bar.png        
-│       ├── shap_beeswarm_0.png        
-│       ├── shap_beeswarm_1.png
-│       ├── shap_beeswarm_2.png
-│       ├── shap_force_plot_idx0_correct.png 
-│       ├── shap_force_plot_idx1_correct.png 
-│       └── shap_force_plot_idx21_error.png  
-│
-├── data/                              ← NOT tracked by Git
-│   ├── raw/                           ← Place nosdra_2026-08-23_15_32_02UTC_complete.csv here
-│   └── processed/                     ← X_train, X_test, y_train, y_test CSVs
-│
-└── models/                            ← NOT tracked by Git
-    ├── xgboost_model.pkl
-    ├── target_encoder.pkl
-    └── label_encoders.pkl
+|
+|-- README.md
+|-- requirements.txt
+|-- .gitignore                         <- excludes data/, models/, __pycache__/
+|-- streamlit_app.py                   <- incident assessment UI
+|
+|-- notebooks/
+|   |-- 01_eda.ipynb                   <- Phase 2: Data Understanding
+|   |-- 02_eda_part_b.ipynb            <- Phase 3: EDA
+|   |-- 03_preprocessing.ipynb         <- Phase 4: Data Preparation
+|   |-- 04_modeling.ipynb              <- Phase 5: Modelling, imbalance handling, comparison
+|   `-- 05_explainability.ipynb        <- Phase 6: SHAP
+|
+|-- src/
+|   |-- preprocess.py                  <- cleaning, encoding, severity engineering
+|   |-- model.py                       <- baseline training (see note below)
+|   `-- explain.py                     <- SHAP helpers
+|
+|-- reports/figures/                   <- saved plots (300 DPI)
+|
+|-- data/                              <- not tracked by Git
+|   |-- raw/
+|   `-- processed/
+|
+`-- models/                            <- not tracked by Git
+    |-- xgboost_model.pkl              <- baseline (unweighted)
+    |-- xgboost_smote_model.pkl        <- SMOTENC-trained
+    |-- xgboost_weighted_model.pkl     <- class-weighted (final model)
+    |-- target_encoder.pkl
+    `-- label_encoders.pkl
 ```
+
+> `src/model.py` currently reproduces the baseline only. The SMOTENC and class-weighted experiments live in `notebooks/04_modeling.ipynb`.
 
 ---
 
 ## Notebook Execution Order
 
-Run notebooks strictly in sequence — each one depends on outputs from the previous.
+Run in sequence; each depends on the previous outputs.
 
-| Order | Notebook | Phase | Key Output |
+| Order | Notebook | Phase | Key output |
 |---|---|---|---|
-| 1 | `01_eda.ipynb` | Phase 2 — Data Understanding | Data dictionary, quality report |
-| 2 | `02_eda_part_b.ipynb` | Phase 3 — EDA | 5 figures, research question answers |
-| 3 | `03_preprocessing.ipynb` | Phase 4 — Preprocessing | X_train/X_test CSVs, encoders |
-| 4 | `04_modeling.ipynb` | Phase 5 — Modelling | Trained SMOTE XGBoost model, metrics |
-| 5 | `05_explainability.ipynb` | Phase 6 — XAI + Report | SHAP plots, IEEE report draft |
+| 1 | `01_eda.ipynb` | Data Understanding | Data dictionary, quality report |
+| 2 | `02_eda_part_b.ipynb` | EDA | 5 figures |
+| 3 | `03_preprocessing.ipynb` | Preprocessing | train/test CSVs, encoders |
+| 4 | `04_modeling.ipynb` | Modelling | Three models, comparison table |
+| 5 | `05_explainability.ipynb` | XAI | SHAP plots |
+
+---
+
+## Imbalance Handling
+
+Two approaches were tested against an unweighted baseline, all with the same split and the same tuned XGBoost settings family.
+
+1. **SMOTENC.** Plain SMOTE interpolates between values, which produces meaningless codes (e.g. `company = 12.4`) for label-encoded categoricals. `SMOTENC` handles categorical columns correctly. It was placed inside an `imblearn` Pipeline so resampling happens on training folds only during cross-validation, and capped at 600 rows each for Major and Medium (full balancing from about 42 Major training rows would be mostly synthetic noise). Tuned with `GridSearchCV` on macro F1; best parameters: `learning_rate=0.1`, `max_depth=7`, `n_estimators=200`.
+2. **Class weighting.** `compute_sample_weight("balanced")` passed to `XGBClassifier.fit`, with `learning_rate=0.1`, `max_depth=7`, `n_estimators=100`.
 
 ---
 
 ## Results
 
-### Model Comparison
+### Model comparison (test set, n = 2,641)
 
-| Model | Weighted F1 | Notes |
-|---|---|---|
-| Dummy Classifier (Baseline) | 0.9408 | Majority-class prediction only |
-| Random Forest | 0.9418 | class_weight='balanced' |
-| XGBoost (Base) | 0.9426 | Suffered from ~0.00 recall on minority classes |
-| **XGBoost (SMOTE-Optimized)** | **0.8984** | **Synthetic oversampling restored minority recall** |
+| Model | Macro F1 | Weighted F1 | Accuracy | Major recall | Medium recall | Minor recall | Major precision | Medium precision |
+|---|---|---|---|---|---|---|---|---|
+| Baseline XGBoost | 0.346 | 0.943 | 0.959 | 0.000 | 0.032 | 0.998 | 0.000 | 0.333 |
+| SMOTENC + XGBoost | 0.371 | 0.944 | 0.958 | 0.000 | 0.084 | 0.994 | 0.000 | 0.348 |
+| **Class-weighted XGBoost** | **0.420** | 0.898 | 0.866 | **0.200** | **0.400** | 0.886 | 0.118 | 0.119 |
 
-**Best XGBoost Hyperparameters:** `learning_rate=0.1`, `max_depth=7`, `n_estimators=100`
+Reference baselines (weighted F1 only): Dummy majority-class 0.9408, Random Forest (`class_weight="balanced"`) 0.9418.
 
-### Per-Class Performance (SMOTE-Optimized XGBoost on Test Set)
+**Macro F1 is the headline metric.** Weighted F1 is dominated by the 96% Minor class, which is why the Dummy classifier scores 0.94 and the best minority-recall model scores lowest on it.
 
-| Severity Class | Precision | Recall | F1-Score | Support |
+### Final model: class-weighted XGBoost
+
+| Severity | Precision | Recall | F1 | Support |
 |---|---|---|---|---|
-| **Major** | 0.12 | 0.20 | 0.15 | 10 |
-| **Medium** | 0.12 | 0.40 | 0.18 | 95 |
-| **Minor** | 0.97 | 0.89 | 0.93 | 2,536 |
-| **Weighted Avg** | **0.94** | **0.87** | **0.90** | 2,641 |
+| Major | 0.12 | 0.20 | 0.15 | 10 |
+| Medium | 0.12 | 0.40 | 0.18 | 95 |
+| Minor | 0.97 | 0.89 | 0.93 | 2,536 |
+| Weighted avg | 0.94 | 0.87 | 0.90 | 2,641 |
 
-> ⚠️ **Critical Interpretation:** While overall accuracy dropped to 87% (Weighted F1: 0.8984) compared to the base model, applying SMOTE successfully broke the model's absolute reliance on the 96% majority class. The model now effectively catches 40% of Medium spills and 20% of Major spills, whereas the base model missed almost all of them. The corresponding drop in precision indicates a higher rate of false positives—aggressively flagging lower-severity spills as high-risk. In environmental risk triage, triggering a Joint Investigation Visit (JIV) unnecessarily is vastly preferable to systematically waving through a catastrophic spill as routine.
+### Interpretation
+
+- **SMOTENC did not solve the problem.** Medium recall rose only from 0.03 to 0.08 and Major stayed at 0.00. With about 42 Major and about 377 Medium training rows and nine features that cannot observe actual spill volume, oversampling adds no new signal.
+- **Class weighting changes the decision boundary far more.** It recovers 40% of Medium and 20% of Major spills (2 of 10), but precision for both falls to about 0.12, meaning roughly 8 of every 9 high-severity flags are false alarms.
+- **Why class weighting is the final model.** In triage, unnecessarily triggering a Joint Investigation Visit costs less than waving a serious spill through as routine, so recall is prioritised. This is a use-case judgement, not a claim that the model is accurate: overall accuracy fell from 95.9% to 86.6%.
+- **The model is a screening aid, not a decision-maker.** Predicted severity should prompt human review, not replace volume assessment.
 
 ---
 
-## SHAP Explainability Findings
+## SHAP Explainability
 
-### Top Feature Drivers (Global Importance)
+SHAP analysis should be run against the final class-weighted model (`models/xgboost_weighted_model.pkl`). The feature-driver observations below were drawn from earlier analysis and must be re-verified against the final model's SHAP plots before being cited.
 
-1. **`cause`** — Incidents attributed to Sabotage/Theft and Equipment Failure are the strongest predictors of Major severity classifications, as identified in the global SHAP bar chart.
-2. **`spillareahabitat`:** Open sea and sensitive inland swamp environments disproportionately push the model toward Major predictions, reflecting the lower volume thresholds for inland habitats in NOSDRA's severity definition.
-3. **`company`:** Certain operating companies carry an inherent risk baseline. Historical data from operators such as NAOC and SPDC shows higher-volume incident patterns, causing the model to assign higher severity probabilities to these operators.
-4. **`incident_year`:** More recent years (post-2020) act as a mitigating factor in local force plots, likely reflecting improved containment technologies or shifts in reporting behaviour.
+Candidate drivers to confirm:
 
-### Policy Recommendations
+1. `cause`: sabotage/theft and equipment failure as drivers of higher severity.
+2. `spillareahabitat`: habitat sensitivity, partly mechanical because inland habitats have lower volume thresholds in the severity definition.
+3. `company`: operator-level historical incident patterns.
+4. `incident_year`: possible downward shift in recent years.
 
-Based on SHAP feature attribution maps, the following recommendations are made for NOSDRA and NDDC:
+### Policy-oriented suggestions (conditional on verified SHAP results)
 
-1. **Risk-Based JIV Prioritisation:** Integrate the model into the incident reporting pipeline. When a report involves high-risk causes (Sabotage) in sensitive habitats (inland swamps), automatically flag the incident as probable Major and prioritise immediate JIV deployment before the official barrel volume is assessed.
-2. **Targeted Operator Audits:** Transition from random compliance checks to targeted operational audits for high-risk operators identified by SHAP company attribution scores.
-3. **Enhanced Habitat Monitoring:** Increase proactive surveillance (drone patrols, community monitoring) specifically in geographical zones historically linked to Major classifications based on `spillareahabitat` feature importance.
+1. **Risk-based JIV prioritisation:** flag reports combining high-risk causes and sensitive habitats for early investigation visits.
+2. **Targeted operator audits** informed by operator-level attribution.
+3. **Habitat-focused monitoring** in areas historically linked to higher-severity predictions.
 
 ---
 
 ## Limitations
 
-1. **Precision Trade-off:** While SMOTE effectively restored the model's ability to recall rare Major and Medium spills, it inherently reduced class precision, producing false positives that may trigger unnecessary resource allocations. 
-2. **Engineered Target:** The severity label is derived from barrel volume thresholds, not an independently assessed ground truth. If `estimatedquantity` itself is inaccurate, the target variable inherits that noise.
-3. **Data Latency & Sparsity:** Pre-2006 records are excluded due to known publication gaps. Active-review and very-recent incidents are also excluded, introducing a systematic recency bias.
-4. **Missing High-Value Features:** `lga`, `typeoffacility`, and `jivpresent` were excluded due to >20% missing values. These columns may contain strong predictive signal and warrant future imputation strategies.
+1. **Weak minority-class performance.** Even the best model has Major precision 0.12 and Medium precision 0.12. Major results rest on 10 test samples.
+2. **Engineered target.** Severity is derived from `estimatedquantity`, so label noise in reported volumes carries directly into the target.
+3. **Limited features.** The model cannot observe actual spill volume at reporting time, which caps achievable minority-class discrimination.
+4. **Data latency and sparsity.** Pre-2006, under-review, and very recent incidents are excluded, introducing recency bias.
+5. **Excluded features.** `lga`, `typeoffacility`, and `jivpresent` were dropped for >20% missingness and may carry signal.
+6. **Single split.** Test metrics come from one stratified split; confidence intervals for the rare classes would be wide.
 
 ---
 
 ## Future Work
 
-- Deploy the serialised SMOTE-Optimized XGBoost model and encoders as a **real-time REST API** using FastAPI
-- Build a **Streamlit dashboard** for non-technical regulatory users
-- Integrate **geospatial features** using the excluded `latitude` and `longitude` columns
-- Explore **deep learning** comparisons (TabNet, LightGBM) to capture more complex feature interactions in highly skewed data spaces
+- Collect or impute high-signal excluded features (`lga`, `typeoffacility`, geospatial coordinates).
+- Evaluate threshold tuning and cost-sensitive learning to trade precision for recall explicitly.
+- Compare LightGBM / CatBoost (native categorical handling, avoiding label encoding).
+- Repeated stratified cross-validation to report uncertainty on Major and Medium recall.
+- Serve the final model through the Streamlit app or a FastAPI endpoint.
 
 ---
 
 ## Author
 
 **Shalom "Vantage" Bolo Bebebaraseigha**  
-Computer Science — University of Uyo  
+Computer Science, University of Uyo  
 Matric No.: 23/SC/CO/010  
-SIWES Industrial Training: NDDC, Bayelsa State (Completed September 2026)  
+SIWES Industrial Training: NDDC, Bayelsa State  
 GitHub: [@shalombebx](https://github.com/shalombebx)
 
 ---
@@ -253,6 +260,6 @@ GitHub: [@shalombebx](https://github.com/shalombebx)
 ## Acknowledgements
 
 - Dataset: [NOSDRA Oil Spill Monitor](https://nosdra.oilspillmonitor.ng)
-- Explainability: [SHAP — Lundberg et al.](https://github.com/slundberg/shap)
-- Methodology: CRISP-DM framework
+- Explainability: [SHAP, Lundberg et al.](https://github.com/slundberg/shap)
+- Methodology: CRISP-DM
 - Development: Google Colab + Google Drive
