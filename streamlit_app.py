@@ -76,7 +76,7 @@ st.markdown(
 # Cache the model loading to prevent reloading on every UI interaction
 @st.cache_resource
 def load_components():
-    model = joblib.load("models/xgboost_model.pkl")
+    model = joblib.load("models/xgboost_weighted_model.pkl")
     encoders = joblib.load("models/label_encoders.pkl")
     # Load target encoder if it was serialized separately for the severity label
     try:
