@@ -1,6 +1,8 @@
-import streamlit as st
-import pandas as pd
+from pathlib import Path
+
 import joblib
+import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="Oil Spill Risk Classifier", layout="wide")
 
@@ -67,7 +69,8 @@ st.markdown(
 )
 
 st.markdown('<div class="page-kicker">Incident assessment</div>', unsafe_allow_html=True)
-st.title("Oil Spill Risk Classifier")
+logo_path = Path(__file__).parent / "assets" / "gemini-svg.svg"
+st.image(logo_path.read_bytes(), width=420)
 st.markdown(
     '<p class="page-intro">Assess the predicted severity of an oil spill incident in the Niger Delta.</p>',
     unsafe_allow_html=True,
