@@ -148,8 +148,6 @@ oil-spill-risk-classifier/
     `-- label_encoders.pkl
 ```
 
-> `src/model.py` currently reproduces the baseline only. The SMOTENC and class-weighted experiments live in `notebooks/04_modeling.ipynb`.
-
 ---
 
 ## Notebook Execution Order
