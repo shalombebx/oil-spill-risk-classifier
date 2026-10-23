@@ -1,3 +1,4 @@
+import base64
 from pathlib import Path
 
 import joblib
@@ -43,6 +44,12 @@ st.markdown(
         margin-top: -0.35rem;
         margin-bottom: 2.25rem;
     }
+    .app-logo {
+        display: block;
+        width: 420px;
+        max-width: 100%;
+        height: auto;
+    }
     .severity-major {
         color: #9c3636;
     }
@@ -70,7 +77,11 @@ st.markdown(
 
 st.markdown('<div class="page-kicker">Incident assessment</div>', unsafe_allow_html=True)
 logo_path = Path(__file__).parent / "assets" / "gemini-svg.svg"
-st.image(logo_path.read_bytes(), width=420)
+logo_data = base64.b64encode(logo_path.read_bytes()).decode("ascii")
+st.markdown(
+    f'<img class="app-logo" src="data:image/svg+xml;base64,{logo_data}" alt="Oil Spill Risk Classifier logo">',
+    unsafe_allow_html=True,
+)
 st.markdown(
     '<p class="page-intro">Assess the predicted severity of an oil spill incident in the Niger Delta.</p>',
     unsafe_allow_html=True,
